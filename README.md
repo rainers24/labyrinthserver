@@ -1,10 +1,12 @@
 # labyrinthserver
 
-In project directory run command `cmake -S . -B build-direc` to compile a project.
+In project directory run:
 
-To build the project run `cmake --build build-direc --target labyrinth_server -- -j 2`
+* To compile the project run `cmake -S . -B cmake-build`
 
-To run the server `./build-direc/labyrinth_server`
+* To build the project run `cmake --build cmake-build --target labyrinth_server -- -j 2`
+                            
+* To run the server `./cmake-build/labyrinth_server`
 
 ## Server response ##
 ```

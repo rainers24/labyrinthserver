@@ -1,1 +1,0 @@
-/usr/bin/cc -pthread -g   CMakeFiles/labyrinth_server.dir/main.c.o CMakeFiles/labyrinth_server.dir/net.c.o CMakeFiles/labyrinth_server.dir/input.c.o CMakeFiles/labyrinth_server.dir/game.c.o CMakeFiles/labyrinth_server.dir/helpers.c.o CMakeFiles/labyrinth_server.dir/timer.c.o CMakeFiles/labyrinth_server.dir/map.c.o  -o labyrinth_server 
