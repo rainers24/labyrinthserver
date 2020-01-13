@@ -6,7 +6,7 @@ Game *game;
  *
  * @return
  */
-Game *create_game() {
+Game *create_game() { // the game is created here, with lobby, players, map, queue and fruits
     game = malloc(sizeof(Game));
 
     game->player_id_seq = 0;
@@ -24,7 +24,7 @@ Game *create_game() {
  *
  * @return
  */
-PlayerList *create_playerlist() {
+PlayerList *create_playerlist() { // players are stored in a list
     PlayerList *list = malloc(sizeof(PlayerList));
     list->head = NULL;
     list->tail = NULL;
@@ -40,7 +40,8 @@ PlayerList *create_playerlist() {
  * @param socket
  * @return
  */
-Player *create_player(int id, char *name, Socket *socket) {
+Player *create_player(int id, char *name, Socket *socket) { // for the players there will be a name which is based on ID , if it is 65 => A
+    //score in the start is 1 not to die in the start
     Player *player = malloc(sizeof(Player));
     player->id = id;
     player->letter = id + 65;
@@ -56,7 +57,7 @@ Player *create_player(int id, char *name, Socket *socket) {
     return player;
 }
 
-void attach_spawn_point(Game *game, Player *player) {
+void attach_spawn_point(Game *game, Player *player) {// for each player there will be a separate spawn point, so that they do not spawn in one place
     Spawn *spawn = get_free_spawn_point(game->map);
     player->x = spawn->x;
     player->y = spawn->y;
@@ -70,7 +71,7 @@ void attach_spawn_point(Game *game, Player *player) {
  * @param player
  * @return
  */
-Player *add_player(Game *game, Player *player) {
+Player *add_player(Game *game, Player *player) { // player is added to the player list and after that it gets a spawn point coordinates
     PlayerList *list = game->players;
 
     if (list->tail != NULL) {
@@ -95,7 +96,7 @@ Player *add_player(Game *game, Player *player) {
  * @param game
  * @param player
  */
-void remove_player(Game *game, Player *player) {
+void remove_player(Game *game, Player *player) { // player is removed
     PlayerList *list = game->players;
 
     if (player->prev) {
@@ -129,79 +130,29 @@ MoveRequestQueue *create_move_request_queue() {
 }
 
 MoveRequest *create_move_request(enum Direction direction) {
-    MoveRequest *request = malloc(sizeof(MoveRequest));
-    request->direction = direction;
-    request->player = NULL;
-    request->next = NULL;
-    request->prev = NULL;
 
-    return request;
 }
 
 void add_move_request(Game *game, Player *player, MoveRequest *request) {
     MoveRequestQueue *queue = game->queue;
 
-    if (queue->tail != NULL) {
-        queue->tail->next = request;
-        request->prev = queue->tail;
-        queue->tail = request;
-    } else {
-        queue->head = request;
-        queue->tail = request;
-    }
-
-    queue->size++;
-
-    player->move_request = request;
-    request->player = player;
 }
 
-void clear_requests(Game *game) {
-    MoveRequest *request = game->queue->head;
+void clear_requests(Game *game) { // clear the moverequests
 
-    while (request) {
-        Player *player = request->player;
-        player->move_request = NULL;
-
-        MoveRequest *prev_request = request;
-        request = request->next;
-        free(prev_request);
-    }
-    free(game->queue);
-    game->queue = create_move_request_queue();
 }
 
 FruitsList *create_fruits_list() {
-    FruitsList *list = malloc(sizeof(FruitsList));
-    list->head = NULL;
-    list->tail = NULL;
-    list->size = 0;
-    return list;
+
 }
 
 Fruit* create_fruit(int x, int y) {
-    Fruit* fruit = malloc(sizeof(Fruit));
-    fruit->x = x;
-    fruit->y = y;
-    fruit->next = NULL;
-    fruit->prev = NULL;
 
-    return fruit;
 }
 
 void add_fruit(Game *game, Fruit * fruit) {
     FruitsList *list = game->fruits;
 
-    if (list->tail != NULL) {
-        list->tail->next = fruit;
-        fruit->prev = list->tail;
-        list->tail = fruit;
-    } else {
-        list->head = fruit;
-        list->tail = fruit;
-    }
-
-    list->size++;
 }
 
 /**
@@ -309,13 +260,7 @@ Player *handle_join_request(Socket *socket, Player *player, char *payload) {
 
 
 void handle_move_request(Player *player, char *payload) {
-    char direction = payload[1];
-    if (player->move_request) {
-        return;
-    }
-    if (direction == DIR_UP || direction == DIR_DOWN || direction == DIR_LEFT || direction == DIR_RIGHT) {
-        add_move_request(game, player, create_move_request(direction));
-    }
+
 }
 
 
@@ -323,7 +268,7 @@ void handle_move_request(Player *player, char *payload) {
  *
  * @param game
  */
-void send_loby_info(Game *game) {
+void send_loby_info(Game *game) { // client side will receive the info about the lobby, what kind of players are in the lobby
     char *message = malloc((size_t) 2 + (game->players->size * 16));
     int offset = 0;
 
@@ -349,7 +294,7 @@ void send_loby_info(Game *game) {
  * @param player
  * @param code
  */
-void print_lobby_info(Game *game) {
+void print_lobby_info(Game *game) {  // print the info about the player who has joined and his starting coordinates
 
     Player *player = game->players->head;
     puts("====================");
@@ -360,45 +305,8 @@ void print_lobby_info(Game *game) {
     puts("====================");
 }
 
+void send_game_start(Game *game){
 
-void send_game_in_progress(Socket *socket) {
-    char *message = inttostr(4, 1);
-    send(*socket->socket, message, (size_t) 1, 0);
-    free(message);
-}
-
-void send_username_taken(Socket *socket) {
-    char *message = inttostr(4, 1);
-    send(*socket->socket, message, (size_t) 1, 0);
-    free(message);
-}
-
-void send_game_start(Game *game) {
-    char *message = malloc((size_t) 2 + (game->players->size * 16) + 6);
-
-    int offset = 0;
-
-    memmove(message + offset, inttostr(5, 1), 1);
-    offset += 1;
-    memmove(message + offset, inttostr(game->players->size, 1), 1);
-    offset += 1;
-
-    Player *player = game->players->head;
-
-    while (player) {
-        memmove(message + offset, player->name, 16);
-        offset += 16;
-        player = player->next;
-    }
-
-    memmove(message + offset, inttostr(90, 3), 3);
-    offset += 3;
-
-    memmove(message + offset, inttostr(30, 3), 3);
-    offset += 3;
-
-    broadcast(message, offset);
-    free(message);
 }
 
 void send_map_row() {
@@ -410,45 +318,9 @@ void send_map() {
 }
 
 void send_game_update(Game *game) {
-    char *message = malloc((size_t) 2 + (game->players->size * 9) + 3 + (game->fruits->size * 6));
-
-    int offset = 0;
-
-    memmove(message + offset, inttostr(7, 1), 1);
-    offset += 1;
-    memmove(message + offset, inttostr(game->players->size, 1), 1);
-    offset += 1;
-
-    Player *player = game->players->head;
-
-    while (player) {
-        memmove(message + offset, inttostr(player->x, 3), 3);
-        offset += 3;
-        memmove(message + offset, inttostr(player->y, 3), 3);
-        offset += 3;
-        memmove(message + offset, inttostr(player->score, 3), 3);
-        offset += 3;
-        player = player->next;
-    }
-
-    memmove(message + offset, inttostr(game->fruits->size, 3), 3);
-    offset += 3;
-
-    Fruit *fruit = game->fruits->head;
-
-    while (fruit) {
-        memmove(message + offset, inttostr(fruit->x, 3), 3);
-        offset += 3;
-        memmove(message + offset, inttostr(fruit->y, 3), 3);
-        offset += 3;
-        fruit = fruit->next;
-    }
-
-    broadcast(message, offset);
-    free(message);
 }
 
-void game_tick(Game *game) {
+void game_tick(Game *game) { // handling the requestes for the movement and control the game tick
     MoveRequest *request = game->queue->head;
 
     while (request) {

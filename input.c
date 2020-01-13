@@ -16,9 +16,7 @@ void* input_reader(void* arg) {
         if (strcmp(cmd, "stop") == 0) {
             stop_server();
         }
-        if (strcmp(cmd, "gamestart") == 0) {
-            send_game_start(game);
-        }
+
         if (strcmp(cmd, "chat") == 0) {
             broadcast(args, 44);
         }

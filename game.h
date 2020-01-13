@@ -126,12 +126,6 @@ void send_loby_info(Game *);
 
 void print_lobby_info(Game *);
 
-void send_game_in_progress(Socket *);
-
-void send_username_taken(Socket *);
-
-void send_game_start(Game *);
-
 void game_tick(Game *);
 
 void handle_player_disconnect_packet(Socket *socket, Player *player, char *payload);

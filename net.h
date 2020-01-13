@@ -30,8 +30,6 @@ void stop_server();
 
 int bind_connection_handler(int, void(*));
 
-//void *connection_handler(void *);
-
 void broadcast(char*, int);
 
 void net_error_handler();
